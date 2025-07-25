@@ -1,235 +1,218 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Destaques com OCR</title>
-  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <title>Destaques do Quadro (OCR)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
-    #carousel {
+    .carrossel {
+      width: 100%;
+      max-width: 500px;
+      margin: 32px auto 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 24px 16px 16px 16px;
       position: relative;
-      max-width: 600px;
-      margin: auto;
     }
     .slide {
       display: none;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      flex-direction: column;
+      align-items: center;
     }
     .slide.active {
-      display: block;
+      display: flex;
     }
     .slide img {
       width: 100%;
-      max-height: 240px;
+      max-height: 220px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 8px;
       margin-bottom: 12px;
     }
     .slide h2 {
-      font-size: 20px;
+      font-size: 1.2rem;
       color: #0079bf;
-      margin: 10px 0 5px;
+      margin: 8px 0 4px 0;
     }
     .slide p {
       color: #333;
-      font-size: 15px;
+      font-size: 1rem;
+      margin: 0 0 8px 0;
+      text-align: center;
     }
     .slide a {
       color: #0079bf;
       font-weight: bold;
-      display: inline-block;
-      margin-top: 8px;
       text-decoration: none;
+      margin-top: 6px;
     }
-    .controls {
-      text-align: center;
+    .controles {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
       margin-top: 16px;
     }
-    .controls button {
+    .controles button {
       background: #0079bf;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 0 10px;
-    }
-    #toggle {
-      display: block;
-      margin: 0 auto 20px auto;
-      background: #ff9800;
       color: #fff;
       border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-size: 1rem;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+    .controles button:hover {
+      background: #005f8c;
+    }
+    .status {
+      text-align: center;
+      color: #888;
+      margin-top: 12px;
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
-  <button id="toggle">Desativar Destaques</button>
-  <div id="carousel"><p>Carregando destaques...</p></div>
-  <div class="controls">
-    <button id="prevBtn">⏪ Anterior</button>
-    <button id="nextBtn">Próximo ⏩</button>
+  <div class="carrossel" id="carrossel">
+    <div class="status" id="status">Carregando cartões...</div>
   </div>
-
+  <div class="controles">
+    <button id="anterior">&#x23EA; Anterior</button>
+    <button id="proximo">Próximo &#x23E9;</button>
+  </div>
   <script>
     const t = window.TrelloPowerUp ? TrelloPowerUp.iframe() : null;
-    const carousel = document.getElementById("carousel");
-    let slides = [], current = 0, interval = null, ativo = true;
+    const carrossel = document.getElementById('carrossel');
+    const status = document.getElementById('status');
+    let slides = [], atual = 0;
 
-    function showSlide(index) {
-      slides.forEach((s, i) => {
-        s.classList.toggle("active", i === index);
+    function mostrarSlide(idx) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === idx);
+      });
+      atual = idx;
+    }
+
+    function proximoSlide() {
+      if (slides.length > 0) {
+        mostrarSlide((atual + 1) % slides.length);
+      }
+    }
+    function anteriorSlide() {
+      if (slides.length > 0) {
+        mostrarSlide((atual - 1 + slides.length) % slides.length);
+      }
+    }
+
+    function criarSlide(cartao, imagemUrl) {
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      const link = cartao.desc && cartao.desc.match(/https?:\/\/[^\s]+/)?.[0] || '#';
+      const img = document.createElement('img');
+      img.src = imagemUrl;
+      slide.appendChild(img);
+      const titulo = document.createElement('h2');
+      titulo.textContent = cartao.name;
+      slide.appendChild(titulo);
+      const texto = document.createElement('p');
+      texto.textContent = '🔎 Lendo texto da imagem...';
+      slide.appendChild(texto);
+      const a = document.createElement('a');
+      a.href = link;
+      a.target = '_blank';
+      a.textContent = '🔗 Ler mais';
+      slide.appendChild(a);
+      carrossel.appendChild(slide);
+      slides.push(slide);
+      // OCR
+      Tesseract.recognize(
+        imagemUrl,
+        'por',
+        { logger: m => {} }
+      ).then(({ data: { text } }) => {
+        texto.textContent = text.trim() || '⚠️ Nenhum texto reconhecido.';
+      }).catch(() => {
+        texto.textContent = '❌ Erro ao processar imagem.';
       });
     }
-    function nextSlide() {
-      if (slides.length > 0) {
-        current = (current + 1) % slides.length;
-        showSlide(current);
-      }
-    }
-    function prevSlide() {
-      if (slides.length > 0) {
-        current = (current - 1 + slides.length) % slides.length;
-        showSlide(current);
-      }
-    }
-    function startAutoAdvance() {
-      interval = setInterval(nextSlide, 6000);
-    }
-    function resetAutoAdvance() {
-      clearInterval(interval);
-      startAutoAdvance();
-    }
-    function createSlide(card, imageUrl) {
-      const slide = document.createElement("div");
-      slide.className = "slide";
-      const link = card.desc && card.desc.match(/https?:\/\/[^\s]+/)?.[0] || "#";
-      const loadingMsg = document.createElement("p");
-      loadingMsg.textContent = "🔎 Lendo texto da imagem...";
-      slide.appendChild(loadingMsg);
-      const img = document.createElement("img");
-      img.src = imageUrl;
-      img.onload = () => {
-        Tesseract.recognize(
-          imageUrl,
-          'por',
-          { logger: m => console.log(m) }
-        ).then(({ data: { text } }) => {
-          slide.innerHTML = `
-            <img src="${imageUrl}" alt="Imagem OCR">
-            <h2>${card.name}</h2>
-            <p>${text.trim() || "⚠️ Nenhum texto reconhecido."}</p>
-            <a href="${link}" target="_blank">🔗 Ler mais</a>
-          `;
-        }).catch(err => {
-          slide.innerHTML = `
-            <img src="${imageUrl}" alt="Erro OCR">
-            <h2>${card.name}</h2>
-            <p>❌ Erro ao processar imagem.</p>
-            <a href="${link}" target="_blank">🔗 Ler mais</a>
-          `;
-        });
-      };
-      carousel.appendChild(slide);
-      slides.push(slide);
-    }
-    function simularCartoes() {
-      return [
-        {
-          name: "Notícia 1",
-          desc: "https://g1.globo.com/",
-          attachments: [
-            { url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" }
-          ],
-          closed: false
-        },
-        {
-          name: "Notícia 2",
-          desc: "https://www.bbc.com/",
-          attachments: [
-            { url: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80" }
-          ],
-          closed: false
-        },
-        {
-          name: "Notícia 3",
-          desc: "https://www.cnnbrasil.com.br/",
-          attachments: [],
-          closed: false
-        }
-      ];
-    }
+
     function carregarCartoes() {
       slides = [];
-      carousel.innerHTML = '';
+      carrossel.innerHTML = '';
+      carrossel.appendChild(status);
+      status.textContent = 'Carregando cartões...';
       if (t) {
-        t.cards('all').then(cards => {
-          const ativos = cards.filter(c => !c.closed);
-          ativos.forEach(card => {
-            const img = (card.attachments && card.attachments.length > 0)
-              ? card.attachments[0].url
-              : "https://source.unsplash.com/600x300/?news";
-            createSlide(card, img);
-          });
-          if (slides.length > 0) {
-            showSlide(0);
-            startAutoAdvance();
-          } else {
-            carousel.innerHTML = "<p>Nenhum cartão encontrado.</p>";
+        t.cards('all').then(cartoes => {
+          const ativos = cartoes.filter(c => !c.closed);
+          if (ativos.length === 0) {
+            status.textContent = 'Nenhum cartão encontrado.';
+            return;
           }
+          status.textContent = '';
+          ativos.forEach(cartao => {
+            const img = (cartao.attachments && cartao.attachments.length > 0)
+              ? cartao.attachments[0].url
+              : 'https://source.unsplash.com/500x220/?news';
+            criarSlide(cartao, img);
+          });
+          setTimeout(() => mostrarSlide(0), 500);
         });
       } else {
         // Simulação local
         setTimeout(() => {
-          const cards = simularCartoes();
-          cards.forEach(card => {
-            const img = (card.attachments && card.attachments.length > 0)
-              ? card.attachments[0].url
-              : "https://source.unsplash.com/600x300/?news";
-            createSlide(card, img);
+          const cartoes = [
+            {
+              name: 'Notícia 1',
+              desc: 'https://g1.globo.com/',
+              attachments: [
+                { url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80' }
+              ],
+              closed: false
+            },
+            {
+              name: 'Notícia 2',
+              desc: 'https://www.bbc.com/',
+              attachments: [
+                { url: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80' }
+              ],
+              closed: false
+            },
+            {
+              name: 'Notícia 3',
+              desc: 'https://www.cnnbrasil.com.br/',
+              attachments: [],
+              closed: false
+            }
+          ];
+          status.textContent = '';
+          cartoes.forEach(cartao => {
+            const img = (cartao.attachments && cartao.attachments.length > 0)
+              ? cartao.attachments[0].url
+              : 'https://source.unsplash.com/500x220/?news';
+            criarSlide(cartao, img);
           });
-          if (slides.length > 0) {
-            showSlide(0);
-            startAutoAdvance();
-          } else {
-            carousel.innerHTML = "<p>Nenhum cartão simulado encontrado.</p>";
-          }
+          setTimeout(() => mostrarSlide(0), 500);
         }, 500);
       }
     }
-    document.getElementById("prevBtn").addEventListener("click", () => {
-      prevSlide();
-      resetAutoAdvance();
-    });
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      nextSlide();
-      resetAutoAdvance();
-    });
-    document.getElementById("toggle").addEventListener("click", () => {
-      ativo = !ativo;
-      if (ativo) {
-        document.getElementById("toggle").textContent = "Desativar Destaques";
-        document.getElementById("carousel").style.display = '';
-        document.querySelector('.controls').style.display = '';
-      } else {
-        document.getElementById("toggle").textContent = "Ativar Destaques";
-        document.getElementById("carousel").style.display = 'none';
-        document.querySelector('.controls').style.display = 'none';
-      }
-    });
+
+    document.getElementById('anterior').onclick = anteriorSlide;
+    document.getElementById('proximo').onclick = proximoSlide;
     carregarCartoes();
   </script>
 </body>
