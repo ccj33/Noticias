@@ -81,6 +81,25 @@
     <button id="nextBtn">Próximo ⏩</button>
   </div>
 
+  <!-- Capability do Power-Up: botão no topo do quadro -->
+  <script>
+    window.TrelloPowerUp.initialize({
+      'board-buttons': function(t, options) {
+        return [{
+          icon: 'https://cdn-icons-png.flaticon.com/512/21/21601.png',
+          text: 'Ver Notícias',
+          callback: function(t) {
+            return t.popup({
+              title: 'Destaques com OCR',
+              url: 'index.html',
+              height: 600
+            });
+          }
+        }];
+      }
+    });
+  </script>
+
   <script>
     const t = TrelloPowerUp.iframe();
     const carousel = document.getElementById("carousel");
