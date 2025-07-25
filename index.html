@@ -53,7 +53,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="https://cdn-icons-png.flaticon.com/512/21/21601.png" alt="Logo" class="logo">
+    <img src="/icon.png" alt="Logo" class="logo">
     <h1>Destaques do Quadro</h1>
     <p>Veja os destaques dos cartões do seu quadro, com texto extraído das imagens via OCR.</p>
     <button class="abrir-popup" id="abrirPopup">Abrir Destaques</button>
@@ -62,7 +62,7 @@
     window.TrelloPowerUp.initialize({
       'board-buttons': function(t, options) {
         return [{
-          icon: 'https://cdn-icons-png.flaticon.com/512/21/21601.png',
+          icon: '/icon.png',
           text: 'Destaques OCR',
           callback: function(t) {
             return t.popup({
