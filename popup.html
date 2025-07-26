@@ -3,78 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <title>Destaques do Quadro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6fa;
-      margin: 0;
-      padding: 20px;
+    body { 
+      font-family: sans-serif; 
+      margin: 20px; 
+      background-color: #f4f5f7; 
     }
-    .carrossel {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      padding: 24px;
+    .carrossel { 
+      max-width: 500px; 
+      margin: auto; 
+      background: #fff; 
+      border-radius: 12px; 
+      padding: 24px; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
     }
-    .slide {
-      display: none;
-      text-align: center;
+    .slide { 
+      display: none; 
+      text-align: center; 
     }
-    .slide.active {
-      display: block;
+    .slide.active { 
+      display: block; 
     }
-    .slide img {
-      width: 100%;
-      max-height: 220px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 12px;
+    .slide img { 
+      width: 100%; 
+      max-height: 220px; 
+      object-fit: cover; 
+      border-radius: 8px; 
+      margin-bottom: 12px; 
+      background-color: #eee; 
     }
-    .slide h2 {
-      font-size: 1.2rem;
-      color: #0079bf;
-      margin: 8px 0 4px 0;
+    .controles { 
+      text-align: center; 
+      margin-top: 16px; 
     }
-    .slide p {
-      color: #333;
-      font-size: 1rem;
-      margin: 0 0 8px 0;
+    button { 
+      background: #0079bf; 
+      color: #fff; 
+      border: none; 
+      padding: 8px 16px; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      margin: 0 5px; 
     }
-    .slide a {
-      color: #0079bf;
-      font-weight: bold;
-      text-decoration: none;
-      margin-top: 6px;
+    button:hover { 
+      background: #005f8c; 
     }
-    .controles {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 16px;
-    }
-    .controles button {
-      background: #0079bf;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 18px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .controles button:hover {
-      background: #005f8c;
-    }
-    .status {
-      text-align: center;
-      color: #888;
-      margin-top: 12px;
-      font-size: 0.95rem;
+    .status { 
+      text-align: center; 
+      color: #666; 
+      margin-bottom: 20px; 
     }
   </style>
 </head>
@@ -83,121 +61,78 @@
     <div class="status" id="status">Carregando cartões...</div>
   </div>
   <div class="controles">
-    <button id="anterior">&#x23EA; Anterior</button>
-    <button id="proximo">Próximo &#x23E9;</button>
+    <button id="anterior">Anterior</button>
+    <button id="proximo">Próximo</button>
   </div>
   
   <script>
-    let t = null;
+    const status = document.getElementById('status');
+    const carrossel = document.getElementById('carrossel');
     let slides = [];
     let atual = 0;
-    
-    // Aguarda o carregamento do Trello Power-Up
-    window.TrelloPowerUp.ready(function() {
-      t = TrelloPowerUp.iframe();
-      carregarCartoes();
-    });
-
-    const carrossel = document.getElementById('carrossel');
-    const status = document.getElementById('status');
 
     function mostrarSlide(idx) {
+      if (slides.length === 0) return;
       slides.forEach((slide, i) => {
         slide.classList.toggle('active', i === idx);
       });
       atual = idx;
     }
 
-    function proximoSlide() {
-      if (slides.length > 0) {
-        mostrarSlide((atual + 1) % slides.length);
-      }
-    }
-    
-    function anteriorSlide() {
-      if (slides.length > 0) {
-        mostrarSlide((atual - 1 + slides.length) % slides.length);
-      }
-    }
-
-    function criarSlide(cartao, imagemUrl) {
+    function criarSlide(cartao) {
       const slide = document.createElement('div');
       slide.className = 'slide';
-      const link = cartao.desc && cartao.desc.match(/https?:\/\/[^\s]+/)?.[0] || '#';
+      const imgUrl = (cartao.attachments && cartao.attachments.length > 0)
+        ? cartao.attachments[0].url
+        : 'https://via.placeholder.com/500x220.png?text=Sem+Imagem';
       
       slide.innerHTML = `
-        <img src="${imagemUrl}" alt="Imagem do cartão">
+        <img src="${imgUrl}" alt="Imagem do cartão">
         <h2>${cartao.name}</h2>
         <p>${cartao.desc || 'Sem descrição'}</p>
-        <a href="${link}" target="_blank">🔗 Ver mais</a>
       `;
-      
       carrossel.appendChild(slide);
       slides.push(slide);
     }
 
-    function carregarCartoes() {
-      slides = [];
-      carrossel.innerHTML = '';
-      carrossel.appendChild(status);
-      status.textContent = 'Carregando cartões...';
-      
-      if (t) {
-        t.cards('all').then(cartoes => {
+    function carregarCartoes(t) {
+      t.cards('all')
+        .then(cartoes => {
+          status.style.display = 'none';
           const ativos = cartoes.filter(c => !c.closed);
+          
           if (ativos.length === 0) {
             status.textContent = 'Nenhum cartão encontrado.';
+            status.style.display = 'block';
             return;
           }
-          status.textContent = '';
-          ativos.forEach(cartao => {
-            const img = (cartao.attachments && cartao.attachments.length > 0)
-              ? cartao.attachments[0].url
-              : 'https://source.unsplash.com/500x220/?news';
-            criarSlide(cartao, img);
-          });
-          if(slides.length > 0) {
-            setTimeout(() => mostrarSlide(0), 100);
+
+          ativos.forEach(criarSlide);
+          if (slides.length > 0) {
+            mostrarSlide(0);
+          } else {
+            status.textContent = 'Nenhum cartão com anexo encontrado.';
+            status.style.display = 'block';
           }
-        }).catch(err => {
+        })
+        .catch(err => {
           status.textContent = 'Erro ao carregar cartões.';
           console.error('Erro:', err);
         });
-      } else {
-        // Simulação local
-        setTimeout(() => {
-          const cartoes = [
-            {
-              name: 'Notícia 1',
-              desc: 'Primeira notícia de teste',
-              attachments: [
-                { url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80' }
-              ],
-              closed: false
-            },
-            {
-              name: 'Notícia 2',
-              desc: 'Segunda notícia de teste',
-              attachments: [
-                { url: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80' }
-              ],
-              closed: false
-            }
-          ];
-          status.textContent = '';
-          cartoes.forEach(cartao => {
-            const img = (cartao.attachments && cartao.attachments.length > 0)
-              ? cartao.attachments[0].url
-              : 'https://source.unsplash.com/500x220/?news';
-            criarSlide(cartao, img);
-          });
-          setTimeout(() => mostrarSlide(0), 100);
-        }, 500);
-      }
     }
 
-    document.getElementById('anterior').onclick = anteriorSlide;
-    document.getElementById('proximo').onclick = proximoSlide;
+    document.getElementById('anterior').onclick = () => {
+      if (slides.length > 0) mostrarSlide((atual - 1 + slides.length) % slides.length);
+    };
+    document.getElementById('proximo').onclick = () => {
+      if (slides.length > 0) mostrarSlide((atual + 1) % slides.length);
+    };
+
+    // Inicializa o Power-Up e carrega os cartões
+    window.TrelloPowerUp.ready(function() {
+      const t = window.TrelloPowerUp.iframe();
+      carregarCartoes(t);
+    });
   </script>
 </body>
 </html> 

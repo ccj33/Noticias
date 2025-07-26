@@ -1,50 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Destaques do Quadro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6fa;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    .container {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      padding: 32px 24px;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    h1 {
-      color: #0079bf;
-      font-size: 1.5rem;
-      margin-bottom: 16px;
-    }
-    .logo {
-      width: 64px;
-      margin-bottom: 16px;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <img src="/icon.png" alt="Logo" class="logo">
-    <h1>Destaques do Quadro</h1>
-    <p>Power-Up funcionando corretamente!</p>
-  </div>
-  
   <script>
     window.TrelloPowerUp.initialize({
       'board-buttons': function(t, options) {
         return [{
-          icon: '/icon.png',
-          text: 'Destaques OCR',
+          icon: './icon.png',
+          text: 'Destaques',
           callback: function(t) {
             return t.popup({
               title: 'Destaques do Quadro',

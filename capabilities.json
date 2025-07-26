@@ -1,8 +1,8 @@
 {
-  "name": "Destaques do Quadro (OCR)",
+  "name": "Destaques do Quadro",
   "author": "ccj",
   "icon": {
-    "url": "https://noticias-tau-three.vercel.app/icon.png"
+    "url": "./icon.png"
   },
-  "iframeConnectorUrl": "https://noticias-tau-three.vercel.app/index.html"
+  "iframeConnectorUrl": "./index.html"
 } 
