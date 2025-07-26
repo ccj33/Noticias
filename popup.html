@@ -88,10 +88,18 @@
   </div>
   
   <script>
-    const t = window.TrelloPowerUp ? TrelloPowerUp.iframe() : null;
+    let t = null;
+    let slides = [];
+    let atual = 0;
+    
+    // Aguarda o carregamento do Trello Power-Up
+    window.TrelloPowerUp.ready(function() {
+      t = TrelloPowerUp.iframe();
+      carregarCartoes();
+    });
+
     const carrossel = document.getElementById('carrossel');
     const status = document.getElementById('status');
-    let slides = [], atual = 0;
 
     function mostrarSlide(idx) {
       slides.forEach((slide, i) => {
@@ -148,7 +156,12 @@
               : 'https://source.unsplash.com/500x220/?news';
             criarSlide(cartao, img);
           });
-          setTimeout(() => mostrarSlide(0), 500);
+          if(slides.length > 0) {
+            setTimeout(() => mostrarSlide(0), 100);
+          }
+        }).catch(err => {
+          status.textContent = 'Erro ao carregar cartões.';
+          console.error('Erro:', err);
         });
       } else {
         // Simulação local
@@ -178,14 +191,13 @@
               : 'https://source.unsplash.com/500x220/?news';
             criarSlide(cartao, img);
           });
-          setTimeout(() => mostrarSlide(0), 500);
+          setTimeout(() => mostrarSlide(0), 100);
         }, 500);
       }
     }
 
     document.getElementById('anterior').onclick = anteriorSlide;
     document.getElementById('proximo').onclick = proximoSlide;
-    carregarCartoes();
   </script>
 </body>
 </html> 
