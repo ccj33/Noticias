@@ -2,21 +2,16 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Destaques do Quadro (OCR)</title>
+  <title>Destaques do Quadro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <script src="/tesseract.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #f4f6fa;
       margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
     }
     .container {
       background: #fff;
@@ -24,26 +19,12 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       padding: 32px 24px;
       max-width: 400px;
-      text-align: center;
+      margin: 0 auto;
     }
     h1 {
       color: #0079bf;
       font-size: 1.5rem;
       margin-bottom: 16px;
-    }
-    .abrir-popup {
-      background: #0079bf;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 24px;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 24px;
-      transition: background 0.2s;
-    }
-    .abrir-popup:hover {
-      background: #005f8c;
     }
     .logo {
       width: 64px;
@@ -55,9 +36,9 @@
   <div class="container">
     <img src="/icon.png" alt="Logo" class="logo">
     <h1>Destaques do Quadro</h1>
-    <p>Veja os destaques dos cartões do seu quadro, com texto extraído das imagens via OCR.</p>
-    <button class="abrir-popup" id="abrirPopup">Abrir Destaques</button>
+    <p>Power-Up funcionando corretamente!</p>
   </div>
+  
   <script>
     window.TrelloPowerUp.initialize({
       'board-buttons': function(t, options) {
@@ -74,18 +55,6 @@
         }];
       }
     });
-    document.getElementById('abrirPopup').onclick = function() {
-      if (window.TrelloPowerUp) {
-    const t = TrelloPowerUp.iframe();
-        t.popup({
-          title: 'Destaques do Quadro',
-          url: './popup.html',
-          height: 600
-        });
-    } else {
-        window.open('./popup.html', '_blank');
-      }
-    };
   </script>
 </body>
 </html>
