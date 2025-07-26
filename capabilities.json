@@ -1,0 +1,17 @@
+{
+  "name": "Destaques do Quadro (OCR)",
+  "capabilities": {
+    "board-buttons": [
+      {
+        "text": "Destaques OCR",
+        "callback": "showHighlights"
+      }
+    ]
+  },
+  "connectors": {},
+  "author": "Você",
+  "icon": {
+    "url": "https://noticias-tau-three.vercel.app/icon.png"
+  },
+  "iframeConnectorUrl": "https://noticias-tau-three.vercel.app/index.html"
+} 
