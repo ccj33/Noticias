@@ -1,91 +1,124 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Destaques do Quadro (OCR)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendário do Quadro</title>
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
-  <script src="/tesseract.min.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6fa;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
     }
-    .container {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      padding: 32px 24px;
-      max-width: 400px;
-      text-align: center;
-    }
-    h1 {
-      color: #0079bf;
-      font-size: 1.5rem;
-      margin-bottom: 16px;
-    }
-    .abrir-popup {
-      background: #0079bf;
-      color: #fff;
-      border: none;
+    .calendar-container {
+      background: white;
       border-radius: 8px;
-      padding: 12px 24px;
-      font-size: 1rem;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .calendar-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+    .calendar-day {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #eee;
       cursor: pointer;
-      margin-top: 24px;
-      transition: background 0.2s;
     }
-    .abrir-popup:hover {
-      background: #005f8c;
+    .calendar-day:hover {
+      background: #f0f0f0;
     }
-    .logo {
-      width: 64px;
-      margin-bottom: 16px;
+    .calendar-day.today {
+      background: #0079bf;
+      color: white;
+    }
+    .calendar-day.has-cards {
+      background: #ff6b6b;
+      color: white;
+    }
+    .weekday-header {
+      font-weight: bold;
+      background: #f5f5f5;
+      padding: 8px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="/icon.png" alt="Logo" class="logo">
-    <h1>Destaques do Quadro</h1>
-    <p>Veja os destaques dos cartões do seu quadro, com texto extraído das imagens via OCR.</p>
-    <button class="abrir-popup" id="abrirPopup">Abrir Destaques</button>
+  <div class="calendar-container">
+    <div class="calendar-header">
+      <h2>📅 Calendário do Quadro</h2>
+      <p>Visualize seus cartões por data</p>
+    </div>
+    <div id="calendar"></div>
   </div>
+
   <script>
+    // Inicialização do Power-Up - PADRÃO FUNCIONAL DO TRELLO
     window.TrelloPowerUp.initialize({
       'board-buttons': function(t, options) {
         return [{
-          icon: '/icon.png',
-          text: 'Destaques OCR',
+          icon: {
+            dark: 'https://cdn-icons-png.flaticon.com/512/747/747310.png',
+            light: 'https://cdn-icons-png.flaticon.com/512/747/747310.png'
+          },
+          text: 'Calendário',
           callback: function(t) {
             return t.popup({
-              title: 'Destaques do Quadro',
+              title: 'Calendário do Quadro',
               url: './popup.html',
-              height: 600
+              height: 500
             });
           }
         }];
       }
     });
-    document.getElementById('abrirPopup').onclick = function() {
-      if (window.TrelloPowerUp) {
-        const t = TrelloPowerUp.iframe();
-        t.popup({
-          title: 'Destaques do Quadro',
-          url: './popup.html',
-          height: 600
-        });
-      } else {
-        window.open('./popup.html', '_blank');
+
+    // Função para gerar calendário
+    function generateCalendar() {
+      const calendar = document.getElementById('calendar');
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay());
+      
+      const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      
+      let html = '<div class="calendar-grid">';
+      
+      // Cabeçalho dos dias da semana
+      weekdays.forEach(day => {
+        html += `<div class="weekday-header">${day}</div>`;
+      });
+      
+      // Dias do calendário
+      for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        
+        const isCurrentMonth = date.getMonth() === currentMonth;
+        const isToday = date.toDateString() === today.toDateString();
+        const dayClass = isToday ? 'calendar-day today' : 'calendar-day';
+        
+        html += `<div class="${dayClass}" style="opacity: ${isCurrentMonth ? '1' : '0.5'}">${date.getDate()}</div>`;
       }
-    };
+      
+      html += '</div>';
+      calendar.innerHTML = html;
+    }
+
+    // Gerar calendário quando a página carregar
+    generateCalendar();
   </script>
 </body>
 </html>
