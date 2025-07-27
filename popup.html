@@ -6,7 +6,7 @@
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
   <style>
     body { 
-      font-family: sans-serif; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
       margin: 20px; 
       background-color: #f4f5f7; 
     }
@@ -17,6 +17,7 @@
       border-radius: 12px; 
       padding: 24px; 
       box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+      min-height: 450px;
     }
     .slide { 
       display: none; 
@@ -27,7 +28,7 @@
     }
     .slide img { 
       width: 100%; 
-      max-height: 220px; 
+      height: 220px; 
       object-fit: cover; 
       border-radius: 8px; 
       margin-bottom: 12px; 
@@ -52,7 +53,7 @@
     .status { 
       text-align: center; 
       color: #666; 
-      margin-bottom: 20px; 
+      padding-top: 150px;
     }
   </style>
 </head>
@@ -66,70 +67,53 @@
   </div>
   
   <script>
-    const status = document.getElementById('status');
-    const carrossel = document.getElementById('carrossel');
+    const statusEl = document.getElementById('status');
+    const carrosselEl = document.getElementById('carrossel');
     let slides = [];
     let atual = 0;
-
-    function mostrarSlide(idx) {
-      if (slides.length === 0) return;
-      slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === idx);
-      });
-      atual = idx;
-    }
 
     function criarSlide(cartao) {
       const slide = document.createElement('div');
       slide.className = 'slide';
-      const imgUrl = (cartao.attachments && cartao.attachments.length > 0)
-        ? cartao.attachments[0].url
-        : 'https://via.placeholder.com/500x220.png?text=Sem+Imagem';
+      const imgUrl = (cartao.attachments && cartao.attachments.length > 0) ? cartao.attachments[0].url : 'https://via.placeholder.com/500x220.png?text=Sem+Imagem';
       
       slide.innerHTML = `
         <img src="${imgUrl}" alt="Imagem do cartão">
         <h2>${cartao.name}</h2>
         <p>${cartao.desc || 'Sem descrição'}</p>
       `;
-      carrossel.appendChild(slide);
+      carrosselEl.appendChild(slide);
       slides.push(slide);
     }
 
     function carregarCartoes(t) {
-      t.cards('all')
-        .then(cartoes => {
-          status.style.display = 'none';
-          const ativos = cartoes.filter(c => !c.closed);
-          
-          if (ativos.length === 0) {
-            status.textContent = 'Nenhum cartão encontrado.';
-            status.style.display = 'block';
-            return;
-          }
-
-          ativos.forEach(criarSlide);
-          if (slides.length > 0) {
-            mostrarSlide(0);
-          } else {
-            status.textContent = 'Nenhum cartão com anexo encontrado.';
-            status.style.display = 'block';
-          }
-        })
-        .catch(err => {
-          status.textContent = 'Erro ao carregar cartões.';
-          console.error('Erro:', err);
-        });
+      t.cards('all').then(cartoes => {
+        const ativos = cartoes.filter(c => !c.closed);
+        if (ativos.length === 0) {
+          statusEl.textContent = 'Nenhum cartão encontrado.';
+          return;
+        }
+        statusEl.style.display = 'none';
+        ativos.forEach(criarSlide);
+        if (slides.length > 0) {
+          mostrarSlide(0);
+        } else {
+          statusEl.textContent = 'Nenhum cartão para exibir.';
+          statusEl.style.display = 'block';
+        }
+      });
+    }
+    
+    function mostrarSlide(idx) {
+      if (slides.length === 0) return;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === idx));
+      atual = idx;
     }
 
-    document.getElementById('anterior').onclick = () => {
-      if (slides.length > 0) mostrarSlide((atual - 1 + slides.length) % slides.length);
-    };
-    document.getElementById('proximo').onclick = () => {
-      if (slides.length > 0) mostrarSlide((atual + 1) % slides.length);
-    };
+    document.getElementById('anterior').onclick = () => slides.length > 0 && mostrarSlide((atual - 1 + slides.length) % slides.length);
+    document.getElementById('proximo').onclick = () => slides.length > 0 && mostrarSlide((atual + 1) % slides.length);
 
-    // Inicializa o Power-Up e carrega os cartões
-    window.TrelloPowerUp.ready(function() {
+    window.TrelloPowerUp.ready(() => {
       const t = window.TrelloPowerUp.iframe();
       carregarCartoes(t);
     });
