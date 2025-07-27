@@ -1,8 +1,15 @@
 {
   "name": "Destaques do Quadro",
   "author": "ccj",
+  "connectors": {
+    "iframe": {
+      "url": "./index.html"
+    }
+  },
+  "capabilities": [
+    "board-buttons"
+  ],
   "icon": {
     "url": "./icon.png"
-  },
-  "iframeConnectorUrl": "./index.html"
+  }
 } 

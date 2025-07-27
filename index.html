@@ -6,19 +6,19 @@
 <body>
   <script>
     window.TrelloPowerUp.initialize({
-      'board-buttons': function(t, options) {
+      'board-buttons': function (t, opts) {
         return [{
           icon: './icon.png',
           text: 'Destaques',
-          callback: function(t) {
+          callback: function (t) {
             return t.popup({
               title: 'Destaques do Quadro',
               url: './popup.html',
-              height: 600
+              height: 600,
             });
-          }
+          },
         }];
-      }
+      },
     });
   </script>
 </body>
