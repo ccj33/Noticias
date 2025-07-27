@@ -4,23 +4,21 @@
   <script src="https://p.trellocdn.com/power-up.min.js"></script>
 </head>
 <body>
-  <h1>Hello, World!</h1>
   <script>
-    var GRAY_ICON = 'https://cdn.hyperdev.com/us-east-1%3A3d31b21c-01a0-4da2-8827-4bc6e88b7618%2Ficon-gray.svg';
-
     window.TrelloPowerUp.initialize({
-      'board-buttons': function (t, opts) {
+      'board-buttons': function(t, options) {
         return [{
-          icon: GRAY_ICON,
-          text: 'Teste Final',
-          callback: function (t) {
+          icon: './icon.png',
+          text: 'Destaques',
+          callback: function(t) {
             return t.popup({
-              title: 'Popup de Teste',
-              url: 'https://www.google.com',
+              title: 'Destaques do Quadro',
+              url: './popup.html',
+              height: 600
             });
-          },
+          }
         }];
-      },
+      }
     });
   </script>
 </body>
